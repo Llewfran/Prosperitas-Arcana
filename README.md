@@ -32,3 +32,8 @@ Rules in this version: 12 Years in 4 Terms of 3, 50 Gold each, Holdings 9 Gold (
 - **Contested Holdings:** if two or more players try to buy the same Holding in a Year, nobody buys it and it stays available (as in the rulebook).
 
 Update: open the app online twice on each device so the new version is cached.
+
+## New in v5
+- **Living House cards:** the character art now breathes and shimmers, with a per-House effect (Astravan stars, Aurivane golden sparks, Corvenis orbiting lights, Caelorum rising embers and lanterns, Vesperis orbiting crystals). Used in the House reveal and on the winner's card.
+- **Master-run finale:** in the final Year the Master screen plays the resolution with all Gold numbers hidden ("???"). The phones are told nothing until the Master presses **Begin the ceremony**. Then every screen runs the build-up from last place to first, a drum roll, and the winner reveal with fireworks.
+- Phones can open **My Year 12 report** after the ceremony. The Master can use **Resend result to phones** if a device missed it.

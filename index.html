@@ -185,6 +185,14 @@ tr.meR td{background:#3a2d12}
 .fin .big{font-size:1.2rem;padding:14px 30px;animation:pulseb 1.8s ease-in-out infinite}
 @keyframes pulseb{0%,100%{box-shadow:0 0 0 0 #e8b84366}50%{box-shadow:0 0 0 14px #e8b84300}}
 @media (min-width:1000px){.cer-t{font-size:4.6rem}.cer-list{width:min(840px,100%)}.cer-row{padding:14px 22px;grid-template-columns:64px 70px 1fr auto}.cp{width:70px;height:70px}.cer-row .rk{font-size:2.2rem}.cer-row .cg{font-size:2.6rem}.cer-row .who b{font-size:1.4rem}.cer-say{font-size:2.3rem}.wcard{width:min(400px,30vw)}.wcard h2{font-size:2.3rem;white-space:nowrap}.wcard .wg{font-size:3rem}.fin-row .fc{width:170px}}
+/* full-screen winner */
+.cer.fullwin .cer-k,.cer.fullwin .cer-t{display:none}
+.cer.fullwin{align-content:center;padding-top:14px}
+.cer.fullwin .cer-wk{margin:0 0 8px}
+.cer.fullwin .wcard{width:min(86vw,calc((100vh - 400px)*.73),460px)}
+.cer.fullwin .wcard h2{font-size:clamp(1.8rem,5vw,3rem);white-space:nowrap}
+.cer.fullwin .wcard .wg{font-size:clamp(2rem,6vw,3.6rem)}
+.cer-small{font-size:.74rem;width:min(560px,100%)}.cer-small table{font-size:.74rem}.cer-small .panel{padding:8px 10px}
 @media (prefers-reduced-motion:reduce){.lc img.lci,.lcs,.fin .big{animation:none!important}}
 </style></head><body>
 <div id="app"></div>
@@ -921,7 +929,8 @@ async function startCeremony(){
   for(let i=rest.length-1;i>=0&&alive();i--){const x=rest[i],rk=W.length+i+1;
     say.innerHTML='<b>In '+ORD[rk]+' place&hellip;</b>';snd('drum');await wait(1500);if(!alive())return;
     list.insertAdjacentHTML('afterbegin','<div class="cer-row'+(my.skip?' now':'')+'"><span class="rk">#'+rk+'</span><div class="cp"><img src="'+HC.mag[x.house]+'" alt=""></div><div class="who"><b>'+esc(x.name)+'</b><div class="tiny mute">House '+x.house+(x.out?' &middot; eliminated':x.debt?' &middot; Debt: cannot win':'')+'</div></div><div class="cg gold">0</div></div>');
-    snd(x.out||x.debt?'fail':'card');countUp(list.firstChild.querySelector('.cg'),x.gold,900,my.skip);await wait(1500);}
+    snd(x.out||x.debt?'fail':'card');countUp(list.firstChild.querySelector('.cg'),x.gold,900,my.skip);await wait(i===0&&W.length?2000:1500);}
+  if(alive()&&W.length){list.innerHTML='';if(root)root.classList.add('fullwin');}
   if(!alive())return;
   if(W.length){
     if(root)root.classList.add('dim');
@@ -934,7 +943,7 @@ async function startCeremony(){
   }else{say.innerHTML='';win.innerHTML='<div class="cer-wk">No House avoided Debt</div>';snd('fail');}
   await wait(2800);
   if(!alive())return;
-  end.innerHTML=standingsHTML(R);
+  end.innerHTML='<div class="cer-small">'+standingsHTML(R)+'</div>';
   ctl.innerHTML=(S.mode==='host'?'<button class="pri" data-a="newgame">New game</button><button class="ghost" data-a="resendfinal">Resend result to phones</button>':(S.report?'<button class="pri" data-a="myreport">My Year '+S.g.cfg.NY+' report</button>':'')+'<button data-a="leavegame">Leave this game</button>')+'<button class="ghost" data-a="cerreplay">Replay</button>';
 }
 // ---------- keep screen awake, reconnect on wake

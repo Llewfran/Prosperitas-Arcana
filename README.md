@@ -23,3 +23,12 @@ Companion app for the Prosperitas Arcana board game: private order sheets, stage
 Change `VERSION` in `sw.js`, upload the changed files, then open the app online twice.
 
 Rules in this version: 12 Years in 4 Terms of 3, 50 Gold each, Holdings 9 Gold (Vesperis 7), each Holding counts as 3 of 6 actions, Debt Card then elimination, Debt cannot win.
+
+## New in this version
+- **Sounds** for every action, including orders arriving from other devices, Year changes and the winner.
+- **Year report** for each player after every Year: gold change, what your House did, and standings.
+- **Winner ceremony** after Year 12 (Skip / Replay available).
+- **Screen stays awake** while the app is open (iOS 16.4+ and modern Android). It reconnects automatically after the phone wakes.
+- **Contested Holdings:** if two or more players try to buy the same Holding in a Year, nobody buys it and it stays available (as in the rulebook).
+
+Update: open the app online twice on each device so the new version is cached.

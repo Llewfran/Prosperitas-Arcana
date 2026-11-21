@@ -63,3 +63,6 @@ Update: open the app online twice on each device so the new version is cached.
 - Pre-game lobby: after Start game the Master shares each player's link first. Phones connect and show "Connected"; the Master's Begin the game button enables when every phone seat is connected (or "Begin without everyone").
 - Ordering is only open after the Master presses Begin Year (Year 1 = Begin the game). Players wait on a "please wait" page (with Rule Book / Opponent Stock) that switches to the order sheet automatically. Host ignores early orders; if the Master reloads mid-game a Begin Year button appears.
 - Timer expiry is enforced every tick until it succeeds: from the order sheet, the Year report, intro or waiting page, phones are pushed to Orders Locked with their current selections sent (auto-retry if sending fails). Also re-checked when the phone wakes or regains focus.
+
+## v12
+- Debt Cards now have their own highlighted "Repay Debt" button at the top of the order menu. Cards you can afford glow green and can be selected as an order (listed in "Your orders" with Remove); cards you cannot afford are greyed with the Gold needed. The Royal Market Mover's 5 Gold discount is shown. The Holdings page uses the same cards.

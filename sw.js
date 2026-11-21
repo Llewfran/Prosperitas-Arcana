@@ -1,5 +1,5 @@
 /* Prosperitas Arcana Table Aid: offline cache. Change VERSION when you update the app so devices pick it up. */
-const VERSION='pa-table-aid-v14';
+const VERSION='pa-table-aid-v15';
 const FILES=['./','./index.html','./manifest.webmanifest','./icon-192.png','./icon-512.png','./icon-maskable-512.png','./apple-touch-icon.png'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(VERSION).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==VERSION).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});

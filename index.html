@@ -200,6 +200,8 @@ tr.meR td{background:#3a2d12}
 @media (min-width:760px){.menu{grid-template-columns:repeat(3,1fr)}}
 .mb{position:relative;display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;text-align:left;min-height:84px;padding:10px 12px;border-radius:14px;background:linear-gradient(160deg,var(--panel2),var(--panel));border:1px solid #6e5120;color:var(--ink)}
 .mb.dim{opacity:.5;border-color:var(--line)}
+.mb.hot{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold),0 0 18px rgba(230,180,60,.45)}
+.dcard.can{border-color:var(--good);box-shadow:0 0 14px rgba(90,200,120,.45)}.dcard.can img{filter:none}.dcard.cant{opacity:.6;cursor:not-allowed}
 .mb .mth{display:flex;align-items:center;min-width:44px}
 .mb .mth img{width:38px;border-radius:5px;border:1px solid #6e5120;box-shadow:0 2px 6px #0009}.mb .mth img+img{margin-left:-20px}
 .mb .mth .em{font-size:1.7rem;width:44px;text-align:center}
@@ -739,9 +741,9 @@ function ctile(o){
   return '<div class="ctile'+(o.off?' off':'')+(o.cur?' used':'')+'"><div class="cimg'+(cp>1?' multi':'')+'" style="'+(cp>1?'margin:'+((cp-1)*5)+'px '+((cp-1)*7)+'px 0 0':'')+'">'+back+'<img class="card fr" src="'+o.img+'" alt="">'+(cp>1?'<span class="cpx">&times;'+cp+'</span>':'')+(o.badge!==undefined?'<span class="badge">'+o.badge+'</span>':'')+'</div><div class="cname">'+esc(o.name)+'</div><div class="cinfo">'+o.info+'</div>'+(o.off?'':o.ctl)+'</div>';
 }
 function secHTML(title,hint,tiles){return '<div class="panel sec"><div class="row spread"><h3>'+title+'</h3><span class="tiny mute">'+hint+'</span></div><div class="crow">'+tiles.join('')+'</div></div>';}
-const APPVER='11',APPDATE='22 Nov 2026';
+const APPVER='12',APPDATE='22 Nov 2026';
 const verTag=()=>'<div class="vtag">Version '+APPVER+' &middot; '+APPDATE+'</div>';
-const PGT={bid:'Manufactured Goods & Market Movers',process:'Refined & Processed Materials',sell:'Trade Sell',buy:'Trade Buy',raw:'Raw Materials',hold:'Holdings',stock:'My Stock',opp:'Opponent Stock',house:'House',rules:'Rule Book'};
+const PGT={bid:'Manufactured Goods & Market Movers',process:'Refined & Processed Materials',sell:'Trade Sell',buy:'Trade Buy',raw:'Raw Materials',hold:'Holdings',stock:'My Stock',opp:'Opponent Stock',house:'House',rules:'Rule Book',debt:'Repay Debt'};
 const hi=k=>HI[k]||IMGS[k];
 function bidCtl(x,cur,mx,typ,locked){
   const amt=cur?cur.amt:0;let o=cur?'<option value="0">No bid (remove)</option>':'<option value="" selected disabled>Choose your own bid (recommended '+typ+')</option>';
@@ -782,7 +784,7 @@ function ordersSummary(d,g){
   const L=[];
   d.acts.forEach((a,i)=>{const t={bid:'Contract '+a.g+': bid '+a.amt+' Gold',process:'Process '+a.k+' &times; '+a.q,sell:'Trade Sell '+a.k+' &times; '+a.q,buy:'Trade Buy '+a.k+' &times; '+a.q,raw:'Raw Buy '+(RAWNAME[a.r]||a.r)+' &times; '+a.q}[a.t];L.push('<div class="o"><span>'+t+'</span><button class="sm ghost" data-a="delact" data-i="'+i+'">Remove</button></div>');});
   d.holds.forEach(r=>L.push('<div class="o"><span>Holding: '+HNAME[r]+'</span><button class="sm ghost" data-a="holdpick" data-r="'+r+'">Remove</button></div>'));
-  if(d.repay.length)L.push('<div class="o"><span>Repay '+d.repay.length+' Debt Card'+(d.repay.length>1?'s':'')+'</span></div>');
+  d.repay.forEach(k=>L.push('<div class="o"><span>Repay Debt Card '+k.split('#')[0]+' ('+debtCost(g,+k.split('#')[0])+' Gold)</span><button class="sm ghost" data-a="repaytog" data-k="'+k+'">Remove</button></div>'));
   return L.length?'<div class="osum">'+L.join('')+'</div>':'<div class="small mute">No orders yet. Pick a category below.</div>';
 }
 function warnHTML(p,g,d,err){
@@ -799,6 +801,10 @@ function rulebookView(){
   if(!RBH){const parts=RULEBOOK.split(/<h2>/).filter(x=>x.trim());RBH=parts.map((x,i)=>{const e=x.indexOf('</h2>');return '<details'+(i===0?' open':'')+'><summary>'+x.slice(0,e)+'</summary><div class="rbc">'+x.slice(e+5)+'</div></details>';}).join('');}
   return '<div class="rb"><div class="tiny mute">The complete rulebook. Tap a chapter to open it.</div>'+RBH+'</div>';
 }
+function debtCost(g,c){return g.mover==='Royal'?Math.max(0,c-5):c;}
+function debtState(p,g,d){const sel=d.repay.reduce((t,k)=>t+debtCost(g,+k.split('#')[0]),0);
+  return p.debt.map((c,i)=>{const k=c+'#'+i,on=d.repay.includes(k),cost=debtCost(g,c);return {c,i,k,on,cost,can:on||p.gold-sel>=cost};});}
+function debtCards(p,g,d){return '<div class="crow" style="margin-top:8px">'+debtState(p,g,d).map(x=>'<div class="dcard'+(x.on?' on':x.can?' can':' cant')+'"'+((x.can||x.on)?' data-a="repaytog" data-k="'+x.k+'"':'')+'><img src="'+DC[x.c]+'" alt="Debt '+x.c+'"><div class="tiny">'+(x.on?'<b>Selected</b>: repay for '+x.cost+' Gold. Tap to cancel':x.can?'<b class="ok">You can pay this</b>: '+x.cost+' Gold. Tap to select':'Needs '+x.cost+' Gold, you have '+p.gold)+'</div></div>').join('')+'</div>';}
 function sheetView(){
   const g=S.g,d=S.draft,p=g.pl[d.seat],kind=S.setup.seats[d.seat].kind;
   const HA=g.cfg.HOLD_ACTIONS,n=d.acts.length+HA*d.holds.length,err=g.validate(p,d.acts.concat(d.holds.map(r=>({t:'hold',r}))));
@@ -813,7 +819,9 @@ function sheetView(){
     const mb=(k,sub,thumbs,dim)=>'<button class="mb'+(dim?' dim':'')+'" data-a="pg" data-pg="'+k+'"><span class="mth">'+thumbs+'</span><span class="mtx"><b>'+PGT[k]+'</b><span class="tiny">'+sub+'</span></span>'+(ords[k]?'<span class="mct">'+ords[k]+'</span>':'')+'</button>';
     const cat=(k,thumbs,noun)=>{const L=live(k),dim=L<1||(n>=6&&!ords[k]);return mb(k,L<1?'Nothing available now':L+' '+noun+' available',thumbs,dim);};
     const T=(...x)=>x.map(i=>'<img src="'+IMGS[i]+'" alt="">').join('');
+    const dst=p.debt.length?debtState(p,g,d):[],dcan=dst.filter(x=>x.can&&!x.on).length;
     h+='<div class="menu">'
+      +(p.debt.length?'<button class="mb hot" data-a="pg" data-pg="debt"><span class="mth">'+p.debt.map(c=>'<img src="'+DC[c]+'" alt="">').join('')+'</span><span class="mtx"><b>Repay Debt</b><span class="tiny">'+(d.repay.length?d.repay.length+' selected to repay':dcan?'You can pay '+dcan+' Debt Card'+(dcan>1?'s':'')+' now':'You have '+p.debt.length+' Debt Card'+(p.debt.length>1?'s':'')+', not enough Gold yet')+'</span></span>'+(d.repay.length?'<span class="mct">'+d.repay.length+'</span>':'')+'</button>':'')
       +cat('bid',T(g.demand[0]||'Arcane Railway','War Golem'),'contract'+(live('bid')===1?'':'s'))
       +cat('process',T('Spellsteel','Phoenix Core'),'card type'+(live('process')===1?'':'s'))
       +cat('sell',T('Thunder Core','Void Alloy'),'card type'+(live('sell')===1?'':'s'))
@@ -837,7 +845,10 @@ function sheetView(){
     h+='<div class="thx" id="thx">'+L.map((x,i)=>'<button data-a="cslide" data-i="'+i+'" class="'+(x.off?'off ':'')+((x.cur||x.sel)?'on':'')+'" aria-label="'+esc(x.name)+'"><img src="'+x.img+'" alt=""></button>').join('')+'</div>';
     h+='<div class="car" id="car">'+L.map(slideHTML).join('')+'</div>';
     h+='<div class="cnav"><button data-a="cprev" aria-label="Previous">&lsaquo;</button><span class="cn" id="carn">1 / '+L.length+'</span><button data-a="cnext" aria-label="Next">&rsaquo;</button></div>';
-    if(pg==='hold'&&p.debt.length)h+='<div class="panel"><div class="small mute">Debt Cards. Repay one at the end of the Year by paying its face value in Gold. Tap a card to select it.</div><div class="crow" style="margin-top:6px">'+p.debt.map((c,i)=>{const k=c+'#'+i,on=d.repay.includes(k);return '<div class="dcard'+(on?' on':'')+'" data-a="repaytog" data-k="'+k+'"><img src="'+DC[c]+'" alt="Debt '+c+'"><div class="tiny">'+(on?'Selected: repay for '+c+' Gold':'Tap to repay for '+c+' Gold')+'</div></div>';}).join('')+'</div></div>';
+    if(pg==='hold'&&p.debt.length)h+='<div class="panel"><div class="small mute">Debt Cards. Repay all of them to unlock Holdings. Tap a green card to select it.</div>'+debtCards(p,g,d)+'</div>';
+  }else if(pg==='debt'){
+    h+='<div class="panel"><div class="small">Select a Debt Card to repay it at the end of the Year by paying its face value in Gold'+(g.mover==='Royal'?' (the Royal Market Mover takes 5 off this Year)':'')+'. Repaying costs no actions. You must repay <b>all</b> your Debt Cards before you can buy a Holding. Green cards are the ones you can pay with your '+p.gold+' Gold.</div>'+debtCards(p,g,d)+'</div>';
+    h+='<div class="panel"><div class="small mute" style="margin-bottom:6px">Your orders this Year</div>'+ordersSummary(d,g)+'</div>';
   }else if(pg==='stock'){
     const tiles=[];RAWS.forEach(r=>{if(p.raw[r].length)tiles.push('<div class="sg"><img src="'+hi(RAWNAME[r])+'" alt=""><b>'+p.raw[r].length+'</b>'+RAWNAME[r]+'</div>');});
     ALLM.forEach(k=>{if(p.pr[k].length)tiles.push('<div class="sg"><img src="'+hi(k)+'" alt=""><b>'+p.pr[k].length+'</b>'+k+'<br>'+p.pr[k].slice().sort((a,b)=>b-a).join(', ')+'</div>');});

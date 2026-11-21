@@ -58,3 +58,8 @@ Update: open the app online twice on each device so the new version is cached.
 ## New in v10
 - When the timer runs out, every player's order is issued **exactly as selected** (including an edit in progress), and the order is then **final**: the "Change my orders" button disappears.
 - The only part dropped is a Holding purchase while the player still has Debt that is not being repaid. Any single action that breaks the rules is also dropped, and everything else is kept.
+
+## v11 (22 Nov 2026)
+- Pre-game lobby: after Start game the Master shares each player's link first. Phones connect and show "Connected"; the Master's Begin the game button enables when every phone seat is connected (or "Begin without everyone").
+- Ordering is only open after the Master presses Begin Year (Year 1 = Begin the game). Players wait on a "please wait" page (with Rule Book / Opponent Stock) that switches to the order sheet automatically. Host ignores early orders; if the Master reloads mid-game a Begin Year button appears.
+- Timer expiry is enforced every tick until it succeeds: from the order sheet, the Year report, intro or waiting page, phones are pushed to Orders Locked with their current selections sent (auto-retry if sending fails). Also re-checked when the phone wakes or regains focus.

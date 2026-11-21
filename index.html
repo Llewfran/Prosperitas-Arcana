@@ -604,7 +604,7 @@ function build(setup,hist){
   if(!g.done)g.begin();
   return g;
 }
-function save(){sv(KEY,{setup:S.setup,hist:S.hist,keys:S.keys||{},fin:S.finalPending||null});}
+function save(){sv(KEY,{setup:S.setup,hist:S.hist,keys:S.keys||{},fin:S.finalPending||null,open:S.openY||0});}
 const humans=()=>S.g.pl.filter(p=>p.human&&!p.out);
 function stateCode(){return b64e({v:1,setup:S.setup,hist:S.hist});}
 
@@ -636,6 +636,7 @@ function tableView(){
   let h='<header class="top"><div><div class="brand">Prosperitas Arcana &middot; v'+APPVER+'</div><div class="yr">Year '+y+' <span class="mute small">of '+g.cfg.NY+' &middot; Term '+Math.ceil(y/tl)+'</span></div></div>'
    +'<div class="chip g" title="'+esc(mover(g)[1])+'">Market Mover: <b>'+esc(mover(g)[0])+'</b> &mdash; '+esc(mover(g)[1])+'</div>'
    +'<div class="row">'+(S.setup.timer?timerChip(true)+'<button class="sm ghost" data-a="restarttimer">Restart timer</button>':'')+'<button class="sm" data-a="menu">Menu</button><button class="sm ghost" data-a="mute">'+(S.muted?'Sound off':'Sound on')+'</button></div></header>';
+  if(S.openY!==y)h+='<div class="panel" style="margin-bottom:10px"><div class="row spread"><div><b>Year '+y+' has not begun.</b><div class="small mute">Players cannot enter orders until you begin the Year'+(S.setup.timer?' (the order timer starts then)':'')+'.</div></div><button class="pri" data-a="beginyear">Begin Year '+y+'</button></div></div>';
   h+='<div class="grid table">';
   // demand + raw
   h+='<div class="grid"><div class="panel"><h3>Demand Market <span class="mute small">'+g.demand.length+' contracts for '+g.alive().length+' Houses</span></h3><div class="plist" style="margin-top:8px">';
@@ -664,7 +665,7 @@ function tableView(){
          :'<div class="row" style="margin-top:6px"><button class="sm pri" data-a="opensheet" data-i="'+p.i+'">'+(S.sheets[p.i]?'Change orders':'Write orders')+'</button></div>')+'</div>';});
   if(!humans().length)h+='<div class="small mute">Bot-only table.</div>';
   const need=humans().filter(p=>!S.sheets[p.i]).length;
-  h+='<div class="row"><button class="pri" data-a="resolve"'+(need?' disabled':'')+'>Resolve Year '+y+'</button>'+(need?'<span class="small mute">'+need+' seat(s) still to submit</span>':'')+'</div>';
+  h+='<div class="row"><button class="pri" data-a="resolve"'+(need||S.openY!==y?' disabled':'')+'>Resolve Year '+y+'</button>'+(need?'<span class="small mute">'+need+' seat(s) still to submit</span>':'')+'</div>';
   if(humans().some(p=>S.setup.seats[p.i].kind==='phone'))h+='<div class="row"><button class="sm" data-a="statecode">Invite players</button></div>';
   h+='</div></div></div>';
   h+='<div class="panel" style="margin-top:12px"><h3>Last Year</h3><div class="log" style="margin-top:6px">'+(S.recap?S.recap.log.map(x=>'<div>'+esc(x)+'</div>').join(''):'<div class="mute">Nothing has happened yet.</div>')+'</div></div>';
@@ -738,7 +739,7 @@ function ctile(o){
   return '<div class="ctile'+(o.off?' off':'')+(o.cur?' used':'')+'"><div class="cimg'+(cp>1?' multi':'')+'" style="'+(cp>1?'margin:'+((cp-1)*5)+'px '+((cp-1)*7)+'px 0 0':'')+'">'+back+'<img class="card fr" src="'+o.img+'" alt="">'+(cp>1?'<span class="cpx">&times;'+cp+'</span>':'')+(o.badge!==undefined?'<span class="badge">'+o.badge+'</span>':'')+'</div><div class="cname">'+esc(o.name)+'</div><div class="cinfo">'+o.info+'</div>'+(o.off?'':o.ctl)+'</div>';
 }
 function secHTML(title,hint,tiles){return '<div class="panel sec"><div class="row spread"><h3>'+title+'</h3><span class="tiny mute">'+hint+'</span></div><div class="crow">'+tiles.join('')+'</div></div>';}
-const APPVER='10',APPDATE='21 Nov 2026';
+const APPVER='11',APPDATE='22 Nov 2026';
 const verTag=()=>'<div class="vtag">Version '+APPVER+' &middot; '+APPDATE+'</div>';
 const PGT={bid:'Manufactured Goods & Market Movers',process:'Refined & Processed Materials',sell:'Trade Sell',buy:'Trade Buy',raw:'Raw Materials',hold:'Holdings',stock:'My Stock',opp:'Opponent Stock',house:'House',rules:'Rule Book'};
 const hi=k=>HI[k]||IMGS[k];
@@ -886,10 +887,11 @@ function hostLive(){
 }
 function onOrder(i,m){
   const g=S.g;if(!g||S.mode!=='host'||g.done||!m||m.id!==S.setup.seed||m.s!==i)return;
+  if(m.t==='hello'){S.joined=S.joined||{};S.joined[i]=true;relayPost(tY(),{t:'welcome',id:S.setup.seed,s:i}).catch(()=>{});if(S.screen==='lobby')render();return;}
   if(m.t==='left'){S.left=S.left||{};S.left[i]=true;delete S.sheets[i];if(S.screen==='table'&&!(S.view&&['sheet','curtain','paste','statecode'].includes(S.view.type))&&S.hv==null)render();return;}
   if(!Array.isArray(m.a))return;
   if(m.y>g.year){S.pend=S.pend||[];S.pend.push([i,m]);return;}
-  if(m.y!==g.year||S.screen==='anim')return;
+  if(m.y!==g.year||S.screen==='anim'||S.openY!==g.year)return;
   const p=g.pl[i];if(!p||p.out||g.validate(p,m.a))return;
   if(S.left)S.left[i]=false;
   S.sheets[i]={acts:m.a.filter(x=>x.t!=='hold'&&x.t!=='repay'),holds:m.a.filter(x=>x.t==='hold').map(x=>x.r),repay:m.a.filter(x=>x.t==='repay').map(x=>x.c+'#'+p.debt.indexOf(x.c))};
@@ -903,11 +905,15 @@ function copyText(t){try{if(navigator.clipboard&&navigator.clipboard.writeText){
   const a=document.createElement('textarea');a.value=t;document.body.appendChild(a);a.select();try{document.execCommand('copy');}catch(e){}a.remove();}
 // seat side
 function persistJoin(){if(S.mode==='seat'&&S.setup)sv(PKEY,{setup:S.setup,hist:S.hist,seat:S.joinSeat,k:S.joinKey,seen:S.seenH||{}});}
-function seatLive(){if(S.mode==='seat'&&S.setup&&S.setup.relay)relayListen(tY(),onYearMsg);}
+function seatLive(){if(S.mode==='seat'&&S.setup&&S.setup.relay){relayListen(tY(),onYearMsg);sendHello();}}
 function onYearMsg(m,ts){
   if(S.mode!=='seat'||!S.setup||!S.g||!m||m.id!==S.setup.seed)return;
   if(m.t==='ack'){if(m.s===S.joinSeat&&m.y===S.g.year){S.acked=true;try{SFX.chime();}catch(e){}if(S.screen==='orderout')render();}return;}
-  if(m.t==='start'&&m.secs&&m.y){const age0=ts?Date.now()-ts*1000:0,age=(age0>0&&age0<7200000)?age0:0;S.starts=S.starts||{};if(!S.starts[m.y]||S.starts[m.y].at<(m.at||0))S.starts[m.y]={endAt:Date.now()+m.secs*1000-age,secs:m.secs,at:m.at||0};if(!S.orderOut||S.g.year!==m.y)tmTick();return;}
+  if(m.t==='welcome'){if(m.s===S.joinSeat){S.welcomed=true;if(S.screen==='waitstart')render();}return;}
+  if(m.t==='start'&&m.y){S.opened=S.opened||{};S.opened[m.y]=true;const age0=ts?Date.now()-ts*1000:0,age=(age0>8000&&age0<7200000)?age0:0;S.starts=S.starts||{};
+    if(m.secs&&(!S.starts[m.y]||S.starts[m.y].at<(m.at||0)))S.starts[m.y]={endAt:Date.now()+m.secs*1000-age,secs:m.secs,at:m.at||0};
+    if(m.y===S.g.year&&S.screen==='waitstart'){seatGo();try{ac();SFX.chime();}catch(e){}render();window.scrollTo(0,0);}
+    tmTick();return;}
   if(m.t==='y'&&m.o){S.ybuf=S.ybuf||{};S.ybuf[m.y]=m.o;advanceYear();}
 }
 function advanceYear(){
@@ -919,7 +925,7 @@ function advanceYear(){
   const mine=S.joinSeat,live=!(S.g.done||mine==null||!S.g.pl[mine]||S.g.pl[mine].out);
   if(live)S.draft=newDraft(mine);
   S.report=makeReport();
-  if(S.g.done)S.screen='ceremony';else if(S.report)S.screen='report';else S.screen=live?'sheet':'waitend';
+  if(S.g.done)S.screen='ceremony';else if(S.report)S.screen='report';else seatGo();
   render();window.scrollTo(0,0);
   if(S.screen==='report')startReport();else if(S.screen==='ceremony')startCeremony();
 }
@@ -1113,7 +1119,8 @@ async function startCeremony(){
 let WL=null;
 async function keepAwake(){try{if('wakeLock' in navigator&&document.visibilityState==='visible'&&!WL){WL=await navigator.wakeLock.request('screen');WL.addEventListener('release',()=>{WL=null;});}}catch(e){WL=null;}}
 function reconnectLive(){if(!S.setup||!S.setup.relay)return;relayStop();if(S.mode==='host')hostLive();else seatLive();}
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){keepAwake();setTimeout(reconnectLive,300);}});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){keepAwake();setTimeout(reconnectLive,300);try{tmTick();}catch(e){}}});
+window.addEventListener('focus',()=>{try{tmTick();}catch(e){}});window.addEventListener('pageshow',()=>{try{tmTick();}catch(e){}});
 window.addEventListener('pageshow',()=>{keepAwake();});
 // ---------- House reveal
 function hsound(){try{ac();SFX.card();setTimeout(()=>{try{SFX.win();}catch(e){}},650);}catch(e){}}
@@ -1136,7 +1143,7 @@ function houseModal(){
 function introFor(list,after){S.hl=list;S.hi=0;S.hafter=after;S.screen='houses';hsound();}
 function introDone(){
   if(S.hafter==='table'){S.screen='table';hostLive();hostStartYear();}
-  else{S.seenH=S.seenH||{};S.hl.forEach(x=>S.seenH[S.setup.seed+':'+x]=1);persistJoin();S.screen=S.hafter;}
+  else{S.seenH=S.seenH||{};S.hl.forEach(x=>S.seenH[S.setup.seed+':'+x]=1);persistJoin();if(S.hafter==='sheet')seatGo();else S.screen=S.hafter;}
 }
 const seenH=x=>!!(S.seenH&&S.seenH[S.setup.seed+':'+x]);
 function othersPanel(me0,full){
@@ -1342,12 +1349,13 @@ function render(){
     else if(S.screen==='seatpick')h=seatPickView();
     else if(S.screen==='sheet')h=sheetView();
     else if(S.screen==='orderout')h=orderOutView();
+    else if(S.screen==='waitstart')h=waitStartView();
     else if(S.screen==='report')h=reportView();
     else if(S.screen==='ceremony')h=ceremonyView();
     else if(S.screen==='waitend'){h=S.g.done?endView().replace('<div class="row"><button class="pri" data-a="newgame">New game</button></div>','<div class="row"><button data-a="leavegame">Leave this game</button></div>'):'<div class="sheet"><div class="panel"><h2>You are out of the game</h2><div class="mute">Your House could not cover its Debt. You can keep watching with the Master&rsquo;s table.</div><div class="row" style="margin-top:8px"><button data-a="leavegame">Leave this game</button></div></div></div>';}
   }else{
     if(S.screen==='setup')h=setupView();else if(S.screen==='join')h=joinView();
-    else if(S.screen==='table')h=tableView();else if(S.screen==='anim')h=animView();else if(S.screen==='recap')h=recapView();else if(S.screen==='end')h=endView();else if(S.screen==='ceremony')h=ceremonyView();else if(S.screen==='finale')h=finaleView();
+    else if(S.screen==='lobby')h=lobbyView();else if(S.screen==='table')h=tableView();else if(S.screen==='anim')h=animView();else if(S.screen==='recap')h=recapView();else if(S.screen==='end')h=endView();else if(S.screen==='ceremony')h=ceremonyView();else if(S.screen==='finale')h=finaleView();
     if(S.view&&S.view.type==='curtain')h+='<div class="modal">'+curtainView()+'</div>';
     else if(S.view&&S.view.type==='sheet')h+='<div class="modal">'+sheetView()+'</div>';
     else if(S.view&&S.view.type==='paste')h+='<div class="modal"><div class="sheet"><div class="panel"><h2>Order code</h2><div class="mute small">Paste the order code from '+esc(S.g.pl[S.view.seat].name)+'&rsquo;s phone.</div><textarea id="pc"></textarea>'+(S.msg?'<div class="msg" style="margin-top:8px">'+esc(S.msg)+'</div>':'')+'<div class="row" style="margin-top:8px"><button class="pri" data-a="pastego">Accept</button><button data-a="closesheet">Cancel</button></div></div></div></div>';
@@ -1397,32 +1405,62 @@ function tmTick(){
   const r=(t.endAt-Date.now())/1000;
   if(r<=30&&!t.a30){t.a30=true;if(r>0){try{ac();SFX.alarm();}catch(e){}tmToast('30 seconds left!');}}
   if(r<=10&&r>0){const k=Math.ceil(r);if(t.lastTick!==k){t.lastTick=k;try{SFX.tick();}catch(e){}}}
-  if(r<=0&&!t.done){t.done=true;try{ac();SFX.timeup();}catch(e){}tmToast('Time is up!');timeUp();}
+  if(r<=0){if(!t.done){t.done=true;try{ac();SFX.timeup();}catch(e){}tmToast('Time is up!');}if(!t.handled&&timeUp())t.handled=true;}
+  if(S.mode==='seat'&&S.screen==='orderout'&&S.sendSt==='fail'&&S.lastActs&&Date.now()-(S.retryAt||0)>5000){S.retryAt=Date.now();sendOrder(S.lastActs,S.joinSeat);}
 }
 function timeUp(){
-  const g=S.g;if(!g||g.done)return;
+  const g=S.g;if(!g||g.done)return true;
   if(S.mode==='seat'){
-    const mine=S.joinSeat;if(mine==null||!g.pl[mine]||g.pl[mine].out)return;
-    if(S.screen==='houses'||S.screen==='ceremony'||S.screen==='orderout')return;
+    const mine=S.joinSeat;if(mine==null||!g.pl[mine]||g.pl[mine].out||!g.pl[mine].human)return true;
+    if(S.screen==='orderout')return true;
+    if(!['sheet','report','houses','waitstart'].includes(S.screen))return S.screen!=='ceremony'&&S.screen!=='finale'?false:true;
     if(!S.draft||S.draft.seat!==mine)S.draft=newDraft(mine);
     const p=g.pl[mine],d=sanitizeDraft(S.draft,p),acts=toActs(d,p);
-    S.orderOut=b64e({s:mine,y:g.year,id:S.setup.seed,a:acts});S.acked=false;S.screen='orderout';S.oview=null;S.msg='Time was up, so your orders were sent automatically exactly as you had selected them. They are final.';sendOrder(acts,mine);render();
+    S.hv=null;S.view=null;S.orderOut=b64e({s:mine,y:g.year,id:S.setup.seed,a:acts});S.acked=false;S.screen='orderout';S.oview=null;S.msg='Time was up, so your orders were sent automatically exactly as you had selected them. They are final.';sendOrder(acts,mine);render();window.scrollTo(0,0);return true;
   }else if(S.mode==='host'){
     if(S.view&&S.view.type==='sheet'&&S.draft){const p=g.pl[S.draft.seat],d=sanitizeDraft(S.draft,p);setSheet(S.draft.seat,d);S.view=null;S.draft=null;render();}
     else if(S.screen==='table'&&!S.view)render();
+    return true;
   }
+  return true;
 }
 function hostStartYear(){
-  if(S.mode!=='host'||!S.setup||!S.setup.timer||!S.g||S.g.done){S.timer=null;return;}
-  const y=S.g.year,secs=S.setup.timer;S.timer={y,secs,endAt:Date.now()+secs*1000};
+  if(S.mode!=='host'||!S.setup||!S.g||S.g.done){S.timer=null;return;}
+  const y=S.g.year,secs=S.setup.timer||0;S.openY=y;S.timer=secs?{y,secs,endAt:Date.now()+secs*1000}:null;save();
   if(S.setup.relay&&Object.keys(S.keys||{}).length)relayPost(tY(),{t:'start',id:S.setup.seed,y,secs,at:Date.now()}).catch(()=>{});
+}
+const yearOpen=()=>S.mode!=='seat'||!!(S.opened&&S.g&&S.opened[S.g.year]);
+function seatGo(){const g=S.g,m=S.joinSeat;
+  if(g.done){S.screen='waitend';return;}
+  if(m==null||!g.pl[m]||!g.pl[m].human){S.screen='seatpick';return;}
+  if(g.pl[m].out){S.screen='waitend';return;}
+  if(!yearOpen()){S.screen='waitstart';return;}
+  if(!S.draft||S.draft.seat!==m)S.draft=newDraft(m);S.screen='sheet';}
+function sendHello(){if(S.mode==='seat'&&S.joinKey&&S.setup&&S.setup.relay&&S.joinSeat!=null)relayPost(tO(S.joinKey),{t:'hello',id:S.setup.seed,s:S.joinSeat}).catch(()=>{});}
+setInterval(()=>{if(S.mode==='seat'&&!S.welcomed)sendHello();},12000);
+function lobbyView(){
+  const ph=S.g.pl.filter(p=>S.setup.seats[p.i].kind==='phone'),n=ph.filter(p=>S.joined&&S.joined[p.i]).length,all=n===ph.length;
+  let h='<header class="top"><div><div class="brand">Prosperitas Arcana &middot; v'+APPVER+'</div><div class="yr">Gathering the Houses</div></div><div class="row">'+liveTag()+'</div></header><div class="sheet"><div class="panel plist"><h2>Connect the players</h2><div class="mute small">Send each player their own link now (iMessage, WhatsApp, email, anything). They open it on their phone, tablet or PC, which loads the game and links it to this table. When every seat shows Connected, begin the game. Do not forward a link: it is tied to one seat.</div>';
+  ph.forEach(p=>{const c=S.joined&&S.joined[p.i];
+    h+='<div class="pcard"><div class="row spread"><div><b>'+esc(p.name)+'</b> <span class="mute small">'+p.house+'</span></div><span class="tag '+(c?'rdy':'wait')+'">'+(c?'Connected':'Waiting&hellip;')+'</span></div><div class="row" style="margin-top:6px"><button class="pri sm" data-a="sharelink" data-i="'+p.i+'">Share link&hellip;</button><button class="sm" data-a="copylink" data-i="'+p.i+'">Copy link</button></div></div>';});
+  h+='<details><summary class="small mute">No live link? Backup game code</summary><div class="mute small" style="margin:6px 0">Players paste this under &ldquo;Join a game from a phone&rdquo;.</div><textarea id="sc" readonly>'+esc(stateCode())+'</textarea><div class="row" style="margin-top:6px"><button class="sm" data-a="copystate">Copy code</button></div></details>'
+   +'<div class="row" style="margin-top:6px"><button class="pri" data-a="beginlobby"'+(all?'':' disabled')+'>Begin the game ('+n+' of '+ph.length+' connected)</button>'+(all?'':'<button class="ghost" data-a="beginlobby" data-f="1">Begin without everyone</button>')+'<button class="ghost" data-a="newgame">Back to setup</button></div></div></div>';
+  return h;
+}
+function waitStartView(){
+  const g=S.g,me=g.pl[S.joinSeat];
+  if(S.oview){const T=S.oview==='rules'?'Rule Book':'Opponent Stock';
+    return '<div class="sheet"><div class="pgbar"><button class="sm" data-a="oback">&lsaquo; Back</button><div class="pgt">'+T+'</div></div>'+(S.oview==='rules'?rulebookView():othersPanel(S.joinSeat,true))+'<div class="row"><button class="pri" data-a="oback">&lsaquo; Back</button></div></div>';}
+  return '<div class="sheet"><div class="panel"><div class="seal"><span>PA</span></div><div class="brand">'+(g.year===1&&!S.hist.length?'Connected':'Year '+g.year)+' &middot; v'+APPVER+'</div><h2>'+esc(me.name)+', please wait</h2><div class="msg ok" style="border-color:var(--good)">'+(g.year===1&&!S.hist.length?(S.welcomed?'You are connected to the Master&rsquo;s table.':'Connecting to the Master&rsquo;s table&hellip;')+' ':'')+'Orders open when the Master begins Year '+g.year+'. This page will switch to your order sheet by itself.</div>'
+   +'<div class="row" style="margin-top:10px"><button class="pri" data-a="oview" data-v="rules">Rule Book</button><button class="pri" data-a="oview" data-v="opp">Opponent Stock</button><button class="ghost" data-a="showhouse" data-i="'+S.joinSeat+'">My House cards</button></div>'+leaveBox()+'</div></div>';
 }
 setInterval(tmTick,250);
 function toActs(d,p){const ex=[];d.holds.forEach(r=>ex.push({t:'hold',r}));d.repay.forEach(x=>{ex.push({t:'repay',c:+x.split('#')[0]});});return d.acts.concat(ex);}
 function startGame(){
   const st=S.setup;const hs=st.seats.map(s=>s.house).filter(x=>x);if(new Set(hs).size!==hs.length)return;
   if(!st.relay)st.relay=rid(12);S.keys={};st.seats.forEach((x,i)=>{if(x.kind==='phone')S.keys[i]=rid(10);});relayStop();S.pend=[];
-  S.hist=[];S.finalPending=null;S.sheets={};S.recap=null;S.g=build(st,S.hist);S.view=null;save();ac();introFor(S.g.pl.map(p=>p.i),'table');render();hostLive();
+  S.hist=[];S.finalPending=null;S.sheets={};S.recap=null;S.g=build(st,S.hist);S.view=null;S.joined={};S.openY=0;save();ac();hostLive();
+  if(st.seats.some(x=>x.kind==='phone')){S.screen='lobby';render();}else{introFor(S.g.pl.map(p=>p.i),'table');render();}
 }
 function doResolve(){
   const g=S.g,before=g.pl.map(p=>p.gold),o={};
@@ -1444,7 +1482,7 @@ function exportLog(){
   (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).catch(()=>{});
 }
 function sendOrder(acts,seat){
-  if(!S.joinKey||!S.setup.relay){S.sendSt='nokey';return;}
+  S.lastActs=acts;if(!S.joinKey||!S.setup.relay){S.sendSt='nokey';return;}
   S.sendSt='sending';
   relayPost(tO(S.joinKey),{id:S.setup.seed,s:seat,y:S.g.year,a:acts}).then(()=>{S.sendSt='sent';if(S.screen==='orderout')render();}).catch(()=>{S.sendSt='fail';if(S.screen==='orderout')render();});
 }
@@ -1460,7 +1498,7 @@ function loadCode(code){
     if(S.joinSeat!==null&&S.joinSeat!==undefined)sv(SKEY,{seat:S.joinSeat,seed:S.joinSeed,k:S.joinKey});
     persistJoin();seatLive();
     if(S.g.done){S.screen='waitend';}
-    else{const mine=S.joinSeat;if(mine!=null&&S.g.pl[mine]&&S.g.pl[mine].human&&!S.g.pl[mine].out){S.draft=newDraft(mine);S.screen='sheet';if(!seenH(mine))introFor([mine],'sheet');}else S.screen='seatpick';}
+    else{const mine=S.joinSeat;S.welcomed=false;S.draft=null;seatGo();if((S.screen==='sheet'||S.screen==='waitstart')&&!seenH(mine))introFor([mine],'sheet');}
     render();
   }catch(e){S.msg='That code did not load. Copy the whole code or link from the Master and try again.';render();}
 }
@@ -1474,11 +1512,13 @@ document.addEventListener('click',e=>{
   if(a==='addseat'){S.setup.seats.push({name:'Bot '+String.fromCharCode(65+S.setup.seats.length),kind:'bot',house:''});render();}
   else if(a==='delseat'){S.setup.seats.pop();render();}
   else if(a==='start')startGame();
-  else if(a==='resume'){const s=ld(KEY);S.setup=s.setup;S.hist=s.hist;if(!S.setup.relay)S.setup.relay=rid(12);S.keys=s.keys||{};S.setup.seats.forEach((x,i)=>{if(x.kind==='phone'&&!S.keys[i])S.keys[i]=rid(10);});S.pend=[];relayStop();S.finalPending=s.fin||null;S.g=build(s.setup,s.hist);S.sheets={};S.recap=null;S.screen=S.g.done?(S.finalPending?'finale':'end'):'table';save();render();hostLive();}
+  else if(a==='beginlobby'){if(el.disabled)return;introFor(S.g.pl.map(p=>p.i),'table');render();}
+  else if(a==='beginyear'){hostStartYear();render();applyPend();}
+  else if(a==='resume'){const s=ld(KEY);S.setup=s.setup;S.hist=s.hist;if(!S.setup.relay)S.setup.relay=rid(12);S.keys=s.keys||{};S.setup.seats.forEach((x,i)=>{if(x.kind==='phone'&&!S.keys[i])S.keys[i]=rid(10);});S.pend=[];relayStop();S.finalPending=s.fin||null;S.g=build(s.setup,s.hist);S.sheets={};S.recap=null;S.joined={};S.openY=(s.open===S.g.year||!S.setup.seats.some(x=>x.kind==='phone'))?S.g.year:0;S.screen=S.g.done?(S.finalPending?'finale':'end'):'table';save();render();hostLive();}
   else if(a==='joinscreen'){S.mode='seat';S.screen='join';S.msg='';render();}
   else if(a==='gosetup'){relayStop();rm(PKEY);S.mode='host';S.screen='setup';S.msg='';render();}
   else if(a==='joingo'){loadCode($('#gc').value);}
-  else if(a==='pickseat'){S.joinSeat=+el.dataset.i;S.joinSeed=S.setup.seed;sv(SKEY,{seat:S.joinSeat,seed:S.joinSeed});S.draft=newDraft(S.joinSeat);S.screen='sheet';render();}
+  else if(a==='pickseat'){S.joinSeat=+el.dataset.i;S.joinSeed=S.setup.seed;sv(SKEY,{seat:S.joinSeat,seed:S.joinSeed});S.welcomed=false;S.draft=null;seatGo();render();sendHello();}
   else if(a==='newcode'){S.screen='join';S.msg='';render();}
   else if(a==='opensheet'){S.view={type:'curtain',seat:+el.dataset.i};render();}
   else if(a==='reveal'){S.draft=newDraft(S.view.seat);S.view={type:'sheet',seat:S.view.seat};S.msg='';render();}
@@ -1525,7 +1565,7 @@ document.addEventListener('click',e=>{
   else if(a==='repaytog'){const d=S.draft,k=el.dataset.k,i=d.repay.indexOf(k);if(i>=0)d.repay.splice(i,1);else d.repay.push(k);render();}
   else if(a==='reinvite'){const i=+el.dataset.i;const old=tO(S.keys[i]);if(LIVE.es[old]){LIVE.es[old].close();delete LIVE.es[old];delete LIVE.st[old];}S.keys[i]=rid(10);if(S.left)S.left[i]=false;save();hostLive();S.view={type:'statecode'};render();}
   else if(a==='takeover'){const i=+el.dataset.i;const old=tO(S.keys[i]);if(LIVE.es[old]){LIVE.es[old].close();delete LIVE.es[old];delete LIVE.st[old];}delete S.keys[i];S.setup.seats[i].kind='device';if(S.left)S.left[i]=false;save();render();}
-  else if(a==='rcontinue'){const me=S.joinSeat;if(S.g.done){S.screen='ceremony';render();startCeremony();}else if(!S.g.pl[me]||S.g.pl[me].out){S.screen='waitend';render();}else{S.screen='sheet';render();window.scrollTo(0,0);}}
+  else if(a==='rcontinue'){const me=S.joinSeat;if(S.g.done){S.screen='ceremony';render();startCeremony();}else if(!S.g.pl[me]||S.g.pl[me].out){S.screen='waitend';render();}else{seatGo();render();window.scrollTo(0,0);}}
   else if(a==='begincer'){const f=S.finalPending;S.finalPending=null;save();if(f&&S.setup.relay&&Object.keys(S.keys||{}).length)relayPost(tY(),{t:'y',id:S.setup.seed,y:f.y,o:f.o}).catch(()=>{S.relayErr=true;});ac();S.screen='ceremony';render();startCeremony();}
   else if(a==='resendfinal'){const o=S.hist[S.hist.length-1].o;relayPost(tY(),{t:'y',id:S.setup.seed,y:S.hist.length,o}).then(()=>{el.textContent='Sent';}).catch(()=>{el.textContent='Could not send';});}
   else if(a==='myreport'){S.screen='report';render();startReport();}
@@ -1562,7 +1602,7 @@ document.addEventListener('change',e=>{
   const pj=ld(PKEY);
   if(m){S.mode='seat';S.joinSeat=sk?sk.seat:null;S.joinSeed=sk?sk.seed:null;S.joinKey=sk?sk.k||null:null;S.seenH=pj&&pj.seen||{};loadCode(m[1]);history.replaceState(null,'',location.pathname+location.search);}
   else if(pj&&pj.setup&&!ld(KEY)){S.mode='seat';S.setup=pj.setup;S.hist=pj.hist;S.joinSeat=pj.seat;S.joinKey=pj.k;S.joinSeed=pj.setup.seed;S.seenH=pj.seen||{};S.g=build(pj.setup,pj.hist);seatLive();
-    if(S.g.done)S.screen='waitend';else{const mine=S.joinSeat;if(mine!=null&&S.g.pl[mine]&&S.g.pl[mine].human&&!S.g.pl[mine].out){S.draft=newDraft(mine);S.screen='sheet';}else S.screen='seatpick';}render();}
+    S.draft=null;seatGo();render();}
   else render();
 })();
 })();

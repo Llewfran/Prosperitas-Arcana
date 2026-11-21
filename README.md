@@ -37,3 +37,11 @@ Update: open the app online twice on each device so the new version is cached.
 - **Living House cards:** the character art now breathes and shimmers, with a per-House effect (Astravan stars, Aurivane golden sparks, Corvenis orbiting lights, Caelorum rising embers and lanterns, Vesperis orbiting crystals). Used in the House reveal and on the winner's card.
 - **Master-run finale:** in the final Year the Master screen plays the resolution with all Gold numbers hidden ("???"). The phones are told nothing until the Master presses **Begin the ceremony**. Then every screen runs the build-up from last place to first, a drum roll, and the winner reveal with fireworks.
 - Phones can open **My Year 12 report** after the ceremony. The Master can use **Resend result to phones** if a device missed it.
+
+## New in v7: phone-friendly order sheet
+- The order sheet now opens on a **menu of buttons**: Manufactured Goods & Market Movers, Refined & Processed Materials, Trade Sell, Trade Buy, Raw Materials, Holdings, My Stock, Opponent Stock, House, Rule Book. Buttons are dimmed (but still open) when you cannot act in that category, and a gold badge shows how many orders you have placed there.
+- Each category opens a **full-screen card page**: one big card at a time, with the quantity selector beneath it. Swipe sideways (or use the arrows or the thumbnail strip) to move through the cards. Cards you cannot use are grey.
+- **Contracts:** a one-tap "Bid X Gold (recommended)" button, and the bid pull-down starts at the recommended value. The Market Mover card is the first card in the Manufactured Goods page.
+- The **complete rulebook** is in the Rule Book section.
+- The phone's Back button returns from a page to the menu.
+- Card pictures are now sharper (the app file is larger, about 3.5 MB). Open it online twice on each device to refresh.

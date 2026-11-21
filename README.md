@@ -66,3 +66,6 @@ Update: open the app online twice on each device so the new version is cached.
 
 ## v12
 - Debt Cards now have their own highlighted "Repay Debt" button at the top of the order menu. Cards you can afford glow green and can be selected as an order (listed in "Your orders" with Remove); cards you cannot afford are greyed with the Gold needed. The Royal Market Mover's 5 Gold discount is shown. The Holdings page uses the same cards.
+
+## v13
+- New Holding rule: instead of Gold income, each Resource Holding gives its owner one free Ghost card of that Raw Material every Year. Use it when Processing or Refining (one use per Year, used before a real card, lost if unused). It never touches the market, cannot be stored or sold, and cannot fill a Raw Buy. Rule Book, order sheet, My Stock page and the game log updated.

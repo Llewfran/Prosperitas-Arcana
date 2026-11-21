@@ -49,3 +49,12 @@ Update: open the app online twice on each device so the new version is cached.
 ## New in v8
 - Cards stay in full colour even when you cannot use them, so you can still read the colour and sigil recipe. An unavailable card has a greyed quantity pull-down that says why ("Unavailable: needs Arcanite + Aether"). Menu buttons still dim.
 - The **version number** (currently Version 8, 21 Nov 2026) is shown on the setup page, the join page, the seat page, the House reveal and the order menu. Everyone should see the same number.
+
+## New in v9
+- All Manufactured Goods Max values are 10 lower (50 and 40 instead of 60 and 50). The in-app rulebook is updated to match.
+- After sending orders, a player can open the **Rule Book** and **Opponent Stock** from the order-sent screen.
+- **Order timer:** the Master picks the time at setup (No timer, or 30 to 300 seconds in 30-second steps). It starts when the Master starts the Year, with a 30-second alarm. When it runs out, each player's selected orders are sent automatically. If their selection is invalid, an invalid part is dropped. A player on the Master device has their open sheet locked in. The Master can press **Restart timer** during a Year.
+
+## New in v10
+- When the timer runs out, every player's order is issued **exactly as selected** (including an edit in progress), and the order is then **final**: the "Change my orders" button disappears.
+- The only part dropped is a Holding purchase while the player still has Debt that is not being repaid. Any single action that breaks the rules is also dropped, and everything else is kept.

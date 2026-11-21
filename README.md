@@ -45,3 +45,7 @@ Update: open the app online twice on each device so the new version is cached.
 - The **complete rulebook** is in the Rule Book section.
 - The phone's Back button returns from a page to the menu.
 - Card pictures are now sharper (the app file is larger, about 3.5 MB). Open it online twice on each device to refresh.
+
+## New in v8
+- Cards stay in full colour even when you cannot use them, so you can still read the colour and sigil recipe. An unavailable card has a greyed quantity pull-down that says why ("Unavailable: needs Arcanite + Aether"). Menu buttons still dim.
+- The **version number** (currently Version 8, 21 Nov 2026) is shown on the setup page, the join page, the seat page, the House reveal and the order menu. Everyone should see the same number.

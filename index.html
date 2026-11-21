@@ -211,8 +211,9 @@ tr.meR td{background:#3a2d12}
 .thx{display:flex;gap:6px;overflow-x:auto;padding:4px 2px;-webkit-overflow-scrolling:touch}
 .thx button{flex:0 0 auto;padding:0;min-height:0;width:38px;border-radius:6px;border:2px solid transparent;background:none;position:relative;line-height:0}
 .thx button img{width:100%;border-radius:4px;display:block}
-.thx button.off img{filter:grayscale(1) brightness(.6)}
+.thx button.off::before{content:"";position:absolute;left:-2px;top:-2px;width:10px;height:10px;border-radius:50%;background:#6b6478;border:1px solid #000;z-index:1}
 .thx button.cur{border-color:var(--gold)}
+.vtag{display:inline-block;font-size:.72rem;color:var(--mute);border:1px solid var(--line);border-radius:999px;padding:1px 10px;margin-top:4px;letter-spacing:.04em}
 .thx button.on::after{content:"";position:absolute;right:-2px;top:-2px;width:10px;height:10px;border-radius:50%;background:var(--good);border:1px solid #000}
 .car{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none;gap:0;overscroll-behavior-x:contain}
 .car::-webkit-scrollbar{display:none}
@@ -223,7 +224,7 @@ tr.meR td{background:#3a2d12}
 .csc .cimg img.bk{position:absolute;width:100%;left:0;top:0;border-radius:14px;border:2px solid #7a5a1f;filter:brightness(.7)}
 .csc .badge{position:absolute;right:8px;bottom:8px;background:linear-gradient(#e8b843,#c48d22);color:var(--gold-ink);font:900 1.5rem var(--fd);border-radius:999px;padding:2px 12px;box-shadow:0 2px 8px #000a}
 .csc .cpx{position:absolute;left:8px;top:8px;background:#000c;color:var(--cream);border:1px solid var(--gold);border-radius:999px;padding:1px 10px;font:900 1.05rem var(--fd)}
-.csc.off .cimg img{filter:grayscale(1) brightness(.62)}.csc.off .badge{filter:grayscale(1);opacity:.7}
+.csq select:disabled,.csq button:disabled{opacity:.55}.car{width:100%;max-width:100%;min-width:0}.cs>*{min-width:0;max-width:100%}.csq{min-width:0}.csq select,.csq button{min-width:0;max-width:100%;width:100%;text-overflow:ellipsis}.csq select:disabled{font-size:.92rem}.csi{overflow-wrap:anywhere}.csq .un{color:var(--warn)}
 .csc.used .cimg img.fr{border-color:var(--gold);box-shadow:0 0 0 3px #e8b84388,0 10px 30px #000c}
 .csc.selc .cimg img.fr{outline:4px solid var(--gold);outline-offset:2px}
 .csn{font:700 1.25rem var(--fd);color:var(--cream);text-align:center}
@@ -605,7 +606,7 @@ function defaultSetup(){return {seed:Math.floor(Math.random()*1e9),relay:rid(12)
  {name:'Master',kind:'device',house:''},{name:'Bot Ada',kind:'bot',house:''},{name:'Bot Bram',kind:'bot',house:''},{name:'Bot Cyra',kind:'bot',house:''}]};}
 function setupView(){
   const st=S.setup,saved=ld(KEY);
-  let h='<header class="top"><div><div class="brand">Prosperitas Arcana</div><h1>Table setup</h1></div></header>';
+  let h='<header class="top"><div><div class="brand">Prosperitas Arcana</div><h1>Table setup</h1>'+verTag()+'</div></header>';
   h+='<div class="sheet"><div class="panel"><div class="small mute" style="margin-bottom:8px">12 Years in 4 Terms of 3 &middot; 50 Gold each &middot; Holdings 9 Gold (Vesperis 7), each Holding counts as 3 of your 6 actions &middot; Debt Card then elimination, Debt cannot win.</div>';
   st.seats.forEach((s,i)=>{
     h+='<div class="seatrow" style="margin:8px 0"><input data-s="'+i+'" data-f="name" value="'+esc(s.name)+'" aria-label="Name">'
@@ -624,7 +625,7 @@ function setupView(){
 function mover(g){const m=MV[g.mover]||MV.Quo;return m;}
 function tableView(){
   const g=S.g,y=g.year,tl=g.cfg.TL;
-  let h='<header class="top"><div><div class="brand">Prosperitas Arcana</div><div class="yr">Year '+y+' <span class="mute small">of '+g.cfg.NY+' &middot; Term '+Math.ceil(y/tl)+'</span></div></div>'
+  let h='<header class="top"><div><div class="brand">Prosperitas Arcana &middot; v'+APPVER+'</div><div class="yr">Year '+y+' <span class="mute small">of '+g.cfg.NY+' &middot; Term '+Math.ceil(y/tl)+'</span></div></div>'
    +'<div class="chip g" title="'+esc(mover(g)[1])+'">Market Mover: <b>'+esc(mover(g)[0])+'</b> &mdash; '+esc(mover(g)[1])+'</div>'
    +'<div class="row"><button class="sm" data-a="menu">Menu</button><button class="sm ghost" data-a="mute">'+(S.muted?'Sound off':'Sound on')+'</button></div></header>';
   h+='<div class="grid table">';
@@ -665,7 +666,7 @@ function tableView(){
 // ---------- recap
 function recapView(){
   const r=S.recap,g=S.g;
-  let h='<header class="top"><div><div class="brand">Prosperitas Arcana</div><div class="yr">End of Year '+r.year+'</div></div><div class="row"><button class="pri" data-a="next">'+(g.done?'See final result':'Begin Year '+(r.year+1))+'</button></div></header>';
+  let h='<header class="top"><div><div class="brand">Prosperitas Arcana &middot; v'+APPVER+'</div><div class="yr">End of Year '+r.year+'</div></div><div class="row"><button class="pri" data-a="next">'+(g.done?'See final result':'Begin Year '+(r.year+1))+'</button></div></header>';
   h+=(S.relayErr?'<div class="msg" style="margin-bottom:10px">The result could not be sent to the other devices. Use Invite players, then the backup code, or check the connection.</div>':'')+'<div class="grid table"><div class="panel"><h3>What happened</h3><div class="log" style="max-height:60vh;margin-top:6px">'+r.log.map(x=>'<div>'+esc(x)+'</div>').join('')+'</div></div>';
   h+='<div class="panel"><h3>Gold</h3><table style="margin-top:6px"><tr><th>House</th><th class="r">Before</th><th class="r">After</th><th class="r">Change</th></tr>';
   g.pl.forEach((p,i)=>{const d=p.gold-r.before[i];h+='<tr><td>'+esc(p.name)+' <span class="tiny mute">'+p.house+'</span></td><td class="r">'+r.before[i]+'</td><td class="r"><b>'+p.gold+'</b></td><td class="r '+(d>0?'ok':d<0?'bad':'')+'">'+(d>0?'+':'')+d+'</td></tr>';});
@@ -674,7 +675,7 @@ function recapView(){
 }
 function endView(){
   const g=S.g,R=g.results().sort((a,b)=>(b.winner-a.winner)||(b.gold-a.gold));
-  let h='<header class="top"><div><div class="brand">Prosperitas Arcana</div><h1>The realm has spoken</h1></div></header><div class="sheet">';
+  let h='<header class="top"><div><div class="brand">Prosperitas Arcana &middot; v'+APPVER+'</div><h1>The realm has spoken</h1></div></header><div class="sheet">';
   const w=R.filter(x=>x.winner);
   h+='<div class="panel win"><h2>'+(w.length?esc(w.map(x=>x.name).join(' and '))+' prospered most':'No eligible winner')+'</h2><div class="mute">'+(w.length?w[0].house+' &middot; '+w[0].gold+' Gold':'Every surviving House ended in Debt.')+'</div></div>';
   h+='<div class="panel"><table><tr><th>#</th><th>House</th><th class="r">Gold</th><th class="r">Debt</th><th class="r">Goods</th><th class="r">Holdings</th></tr>';
@@ -729,6 +730,8 @@ function ctile(o){
   return '<div class="ctile'+(o.off?' off':'')+(o.cur?' used':'')+'"><div class="cimg'+(cp>1?' multi':'')+'" style="'+(cp>1?'margin:'+((cp-1)*5)+'px '+((cp-1)*7)+'px 0 0':'')+'">'+back+'<img class="card fr" src="'+o.img+'" alt="">'+(cp>1?'<span class="cpx">&times;'+cp+'</span>':'')+(o.badge!==undefined?'<span class="badge">'+o.badge+'</span>':'')+'</div><div class="cname">'+esc(o.name)+'</div><div class="cinfo">'+o.info+'</div>'+(o.off?'':o.ctl)+'</div>';
 }
 function secHTML(title,hint,tiles){return '<div class="panel sec"><div class="row spread"><h3>'+title+'</h3><span class="tiny mute">'+hint+'</span></div><div class="crow">'+tiles.join('')+'</div></div>';}
+const APPVER='8',APPDATE='21 Nov 2026';
+const verTag=()=>'<div class="vtag">Version '+APPVER+' &middot; '+APPDATE+'</div>';
 const PGT={bid:'Manufactured Goods & Market Movers',process:'Refined & Processed Materials',sell:'Trade Sell',buy:'Trade Buy',raw:'Raw Materials',hold:'Holdings',stock:'My Stock',opp:'Opponent Stock',house:'House',rules:'Rule Book'};
 const hi=k=>HI[k]||IMGS[k];
 function bidCtl(x,cur,mx,typ,locked){
@@ -738,27 +741,28 @@ function bidCtl(x,cur,mx,typ,locked){
   if(!cur&&!locked)return '<button class="pri bigb" data-a="bidrec" data-k="'+esc(x)+'" data-v="'+typ+'">Bid '+typ+' Gold (recommended)</button><div class="or tiny mute">or</div>'+sl;
   return '<div class="lbl">Your bid in Gold (recommended '+typ+')</div>'+sl;
 }
-function qCtl(t,key,mx,cur,locked,label){return '<div class="lbl">'+label+'</div>'+qsel(t,key,mx,cur?cur.q:0,locked);}
+function unCtl(why){return '<div class="lbl un">Unavailable right now</div><select disabled aria-label="Unavailable"><option>Unavailable: '+esc(why)+'</option></select>';}
+function qCtl(t,key,mx,cur,locked,label){return '<div class="lbl'+(locked?' un':'')+'">'+(locked?'All 6 actions are used. Remove an order to add this.':label)+'</div>'+qsel(t,key,mx,cur?cur.q:0,locked);}
 function sheetSpecs(p,g,d,lockedFor){
   const SP={bid:[],process:[],sell:[],buy:[],raw:[],hold:[]};
   const mv=MV[g.mover]||MV.Quo;
   SP.bid.push({mover:1,img:MVI[g.mover]||MVI.Quo,name:'Market Mover: '+mv[0],off:false,info:esc(mv[1])+'. This Term&rsquo;s Market Mover changes what the demand cards are worth.'});
   const dg=[...new Set(g.demand)].sort((a,b)=>g.maxv(b)-g.maxv(a));
   dg.forEach(x=>{const need=GOODS[x].slice(0,2),can=need.every(c=>p.pr[c].length),cur=actOf(d,'bid',x),mx=g.maxv(x),typ=Math.max(1,Math.round(g.mkt_ratio*mx)),cp=g.demand.filter(z=>z===x).length;
-    SP.bid.push({key:x,img:hi(x),copies:cp,name:x,off:!can,cur:!!cur,badge:mx,info:(can?'Needs '+need.join(' + ')+'. Max '+mx+' &middot; '+cp+' in the market. You are paid your bid if you win; the lowest bids win.':'You are missing '+need.filter(c=>!p.pr[c].length).join(' and ')+' (needs '+need.join(' + ')+')'),ctl:can?bidCtl(x,cur,mx,typ,lockedFor('bid',x)):''});});
+    SP.bid.push({key:x,img:hi(x),copies:cp,name:x,off:!can,cur:!!cur,badge:mx,info:(can?'Needs '+need.join(' + ')+'. Max '+mx+' &middot; '+cp+' in the market. You are paid your bid if you win; the lowest bids win.':'You are missing '+need.filter(c=>!p.pr[c].length).join(' and ')+' (needs '+need.join(' + ')+')'),ctl:can?bidCtl(x,cur,mx,typ,lockedFor('bid',x)):unCtl('missing '+need.filter(c=>!p.pr[c].length).join(' + '))});});
   ALLM.forEach(k=>{const rec=RECIPE[k];let mx=99;[...new Set(rec)].forEach(r=>{mx=Math.min(mx,Math.floor(p.raw[r].length/rec.filter(z=>z===r).length));});
     mx=Math.min(mx,9,Math.max(0,g.pdeck[k].length-1));const cur=actOf(d,'process',k),need=rec.map(r=>RAWNAME[r]).join(' + ');
-    SP.process.push({key:k,img:hi(k),name:k,off:mx<1,cur:!!cur,badge:g.pdeck[k].length>1?g.pdeck[k][0]:'-',info:mx<1?'Needs '+need+' (you cannot make this yet)':'Needs '+need+'. You can make up to '+mx+'.',ctl:mx<1?'':qCtl('process',k,mx,cur,lockedFor('process',k),'How many to make')});
+    SP.process.push({key:k,img:hi(k),name:k,off:mx<1,cur:!!cur,badge:g.pdeck[k].length>1?g.pdeck[k][0]:'-',info:mx<1?'Needs '+need+' (you cannot make this yet)':'Needs '+need+'. You can make up to '+mx+'.',ctl:mx<1?unCtl('needs '+need):qCtl('process',k,mx,cur,lockedFor('process',k),'How many to make')});
     const pa=actOf(d,'process',k),hold=p.pr[k].length+(pa?pa.q:0),smx=Math.min(9,hold),scur=actOf(d,'sell',k),t=g.trade[k];
-    SP.sell.push({key:k,img:hi(k),name:k,off:smx<1,cur:!!scur,badge:t.length?t[0]:'-',info:smx<1?'You hold none to sell':'You hold '+hold+(pa?' (including what you process)':'')+'. Pool has '+t.length+' card'+(t.length===1?'':'s')+(t.length?', lowest '+t[0]:'')+'. Your highest cards go in; the lowest card sets the price for every seller.',ctl:smx<1?'':qCtl('sell',k,smx,scur,lockedFor('sell',k),'How many to sell')});
+    SP.sell.push({key:k,img:hi(k),name:k,off:smx<1,cur:!!scur,badge:t.length?t[0]:'-',info:smx<1?'You hold none to sell':'You hold '+hold+(pa?' (including what you process)':'')+'. Pool has '+t.length+' card'+(t.length===1?'':'s')+(t.length?', lowest '+t[0]:'')+'. Your highest cards go in; the lowest card sets the price for every seller.',ctl:smx<1?unCtl('you hold none'):qCtl('sell',k,smx,scur,lockedFor('sell',k),'How many to sell')});
     const bmx=Math.min(9,t.length),bcur=actOf(d,'buy',k);
-    SP.buy.push({key:k,img:hi(k),name:k,off:bmx<1,cur:!!bcur,badge:t.length?g.buyPx(k,1):'-',info:bmx<1?'The pool is empty':t.length+' card'+(t.length===1?'':'s')+' in the pool. One card costs about '+g.buyPx(k,1)+(bcur?'; '+bcur.q+' together about '+g.buyPx(k,bcur.q)+' each':'')+'. All buyers&rsquo; demand is added together.',ctl:bmx<1?'':qCtl('buy',k,bmx,bcur,lockedFor('buy',k),'How many to buy')});});
+    SP.buy.push({key:k,img:hi(k),name:k,off:bmx<1,cur:!!bcur,badge:t.length?g.buyPx(k,1):'-',info:bmx<1?'The pool is empty':t.length+' card'+(t.length===1?'':'s')+' in the pool. One card costs about '+g.buyPx(k,1)+(bcur?'; '+bcur.q+' together about '+g.buyPx(k,bcur.q)+' each':'')+'. All buyers&rsquo; demand is added together.',ctl:bmx<1?unCtl('the pool is empty'):qCtl('buy',k,bmx,bcur,lockedFor('buy',k),'How many to buy')});});
   RAWS.forEach(r=>{const dk=g.rawdeck[r],cur=actOf(d,'raw',r),mx=Math.min(9,dk.length-1);
-    SP.raw.push({key:r,img:hi(RAWNAME[r]),name:RAWNAME[r],off:mx<1,cur:!!cur,badge:dk[0],info:mx<1?'No cards left':'Top price now '+dk[0]+'. '+(dk.length-1)+' cards left. Everyone pays the same price; more demand pushes it up'+(cur?'. About '+dk[Math.min(cur.q,dk.length-1)]+' each after your '+cur.q:'')+'.',ctl:mx<1?'':qCtl('raw',r,mx,cur,lockedFor('raw',r),'How many to buy')});});
+    SP.raw.push({key:r,img:hi(RAWNAME[r]),name:RAWNAME[r],off:mx<1,cur:!!cur,badge:dk[0],info:mx<1?'No cards left':'Top price now '+dk[0]+'. '+(dk.length-1)+' cards left. Everyone pays the same price; more demand pushes it up'+(cur?'. About '+dk[Math.min(cur.q,dk.length-1)]+' each after your '+cur.q:'')+'.',ctl:mx<1?unCtl('no cards left'):qCtl('raw',r,mx,cur,lockedFor('raw',r),'How many to buy')});});
   const HA=g.cfg.HOLD_ACTIONS,n=d.acts.length+HA*d.holds.length,closed=g.year>=g.cfg.NY,canHold=!closed&&(!p.debt.length||d.repay.length>=p.debt.length);
   RAWS.forEach(r=>{const own=g.owner[r],c=g.holdCost(p),sel=d.holds.includes(r),ok=canHold&&own===undefined&&(sel||n+HA<=6);
     SP.hold.push({key:r,img:HHI[r]||HIMGS[r],name:HNAME[r],off:!ok,sel:sel,badge:c,info:own!==undefined?'Owned by '+esc(g.pl[own].name):!canHold?(closed?'Closed in the final Year':'Select all your Debt Cards below to repay them, then you can buy'):sel?'Selected. It is bought at the end of the Year.':n+HA>6?'No free actions ('+HA+' needed)':'Costs '+c+' Gold and '+HA+' of your 6 actions. Pays you 1 Gold for every '+RAWNAME[r]+' card drawn by anyone. If two Houses try for the same Holding, neither gets it.'+(p.gold<c*(d.holds.length+1)?' You hold '+p.gold+' Gold now; it is paid at the end of the Year after income.':''),
-      ctl:ok?'<button class="pri bigb" data-a="holdpick" data-r="'+r+'">'+(sel?'Selected. Tap to cancel':'Buy this Holding ('+c+' Gold)')+'</button>':''});});
+      ctl:ok?'<button class="pri bigb" data-a="holdpick" data-r="'+r+'">'+(sel?'Selected. Tap to cancel':'Buy this Holding ('+c+' Gold)')+'</button>':'<div class="lbl un">Unavailable right now</div><button class="bigb" disabled>'+(own!==undefined?'Owned by '+esc(g.pl[own].name):!canHold?(closed?'Closed in the final Year':'Repay your Debt first'):'No free actions')+'</button>'});});
   return SP;
 }
 function slideHTML(s,i){
@@ -814,7 +818,7 @@ function sheetView(){
       +'</div><div class="tiny mute">Orders resolve in this order: Contracts, Process, Trade Sell, Trade Buy, Raw Buy, then Holdings at the end of the Year. Grey buttons have nothing you can do right now, but you can still open them.</div>';
     h+='<div class="panel"><div class="small mute" style="margin-bottom:6px">Your orders this Year</div>'+ordersSummary(d,g)+'</div>';
     h+=warnHTML(p,g,d,err);
-    h+='<div class="row"><button class="pri" data-a="lock"'+(err?' disabled':'')+'>'+(S.mode==='seat'?'Send my orders':'Lock in orders')+'</button>'+(S.mode==='seat'?(S.orderOut?'<button data-a="backout">Back</button>':(S.joinKey?'':'<button data-a="closesheet">Cancel</button>')):'<button data-a="closesheet">'+(kind==='device'?'Cancel':'Back')+'</button>')+'</div>'+(S.mode==='seat'?leaveBox():'');
+    h+='<div class="row"><button class="pri" data-a="lock"'+(err?' disabled':'')+'>'+(S.mode==='seat'?'Send my orders':'Lock in orders')+'</button>'+(S.mode==='seat'?(S.orderOut?'<button data-a="backout">Back</button>':(S.joinKey?'':'<button data-a="closesheet">Cancel</button>')):'<button data-a="closesheet">'+(kind==='device'?'Cancel':'Back')+'</button>')+'</div>'+(S.mode==='seat'?leaveBox():'')+verTag();
     return h+'</div>';
   }
   h+=bar(PGT[pg]);
@@ -1114,7 +1118,7 @@ function hxBody(seat,showNum){
 function housesView(){
   const seat=S.hl[S.hi],H=HINFO[S.g.pl[seat].house],n=S.hl.length,last=S.hi>=n-1;
   return '<div class="hx" style="--hc:'+H.c+';--hg:'+H.c+'66">'+hxBody(seat,n>1?'House '+(S.hi+1)+' of '+n:'Your House')
-   +'<div class="row" style="justify-content:center;margin-top:8px"><button class="pri" data-a="hnext">'+(last?(S.hafter==='table'?'Begin the game':'To my orders'):'Next House &rsaquo;')+'</button>'+(n>1&&!last?'<button class="ghost" data-a="hskip">Skip</button>':'')+'</div></div>';
+   +'<div class="row" style="justify-content:center;margin-top:8px"><button class="pri" data-a="hnext">'+(last?(S.hafter==='table'?'Begin the game':'To my orders'):'Next House &rsaquo;')+'</button>'+(n>1&&!last?'<button class="ghost" data-a="hskip">Skip</button>':'')+'</div>'+verTag()+'</div>';
 }
 function houseModal(){
   const seat=S.hv,H=HINFO[S.g.pl[seat].house];
@@ -1140,11 +1144,11 @@ function leaveBox(){
 }
 // ---------- phone (seat) mode
 function joinView(){
-  let h='<header class="top"><div><div class="brand">Prosperitas Arcana</div><h1>Join from your phone</h1></div></header><div class="sheet"><div class="panel"><div class="small mute">Paste the game code from the table, or open the link the host shows you.</div><textarea id="gc" placeholder="Game code"></textarea><div class="row" style="margin-top:8px"><button class="pri" data-a="joingo">Load game</button><button class="ghost" data-a="gosetup">Back</button></div>'+(S.msg?'<div class="msg" style="margin-top:8px">'+esc(S.msg)+'</div>':'')+'</div></div>';
+  let h='<header class="top"><div><div class="brand">Prosperitas Arcana</div><h1>Join from your phone</h1>'+verTag()+'</div></header><div class="sheet"><div class="panel"><div class="small mute">Paste the game code from the table, or open the link the host shows you.</div><textarea id="gc" placeholder="Game code"></textarea><div class="row" style="margin-top:8px"><button class="pri" data-a="joingo">Load game</button><button class="ghost" data-a="gosetup">Back</button></div>'+(S.msg?'<div class="msg" style="margin-top:8px">'+esc(S.msg)+'</div>':'')+'</div></div>';
   return h;
 }
 function seatPickView(){
-  let h='<header class="top"><div><div class="brand">Prosperitas Arcana</div><h1>Which seat are you?</h1></div></header><div class="sheet"><div class="panel plist">';
+  let h='<header class="top"><div><div class="brand">Prosperitas Arcana</div><h1>Which seat are you?</h1>'+verTag()+'</div></header><div class="sheet"><div class="panel plist">';
   S.g.pl.forEach(p=>{if(p.human&&!p.out)h+='<button data-a="pickseat" data-i="'+p.i+'">'+esc(p.name)+' &middot; '+p.house+'</button>';});
   h+='</div><div class="small mute">Year '+S.g.year+'. Only pick your own seat.</div></div>';return h;
 }

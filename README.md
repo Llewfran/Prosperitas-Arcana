@@ -69,3 +69,6 @@ Update: open the app online twice on each device so the new version is cached.
 
 ## v13
 - New Holding rule: instead of Gold income, each Resource Holding gives its owner one free Ghost card of that Raw Material every Year. Use it when Processing or Refining (one use per Year, used before a real card, lost if unused). It never touches the market, cannot be stored or sold, and cannot fill a Raw Buy. Rule Book, order sheet, My Stock page and the game log updated.
+
+## v14
+- Rule Book wording aligned with play: Debt Cards may be repaid in any order (the order sheet lets you pick), Holdings cannot be bought while you hold Debt or in Year 12.
